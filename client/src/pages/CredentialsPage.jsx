@@ -113,7 +113,7 @@ function CredentialsPage() {
 			<CredentialsForm open={openForm} onClose={() => setOpenForm(false)} onConfirm={onConfirm} team={selectedTeam} />
 
 			<Dialog open={openDelete} onClose={handleDeleteClose}>
-				<DialogTitle sx={{ px: 4, pt: 4, pb: 0 }}>
+				<DialogTitle sx={{ px: 4, pt: 4, pb: 0 }} component="div">
 					<Typography variant="h6" fontWeight={700}>
 						Are you sure?
 					</Typography>

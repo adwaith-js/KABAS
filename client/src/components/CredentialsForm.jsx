@@ -43,7 +43,7 @@ function CredentialsForm({ open, onClose, onConfirm, team }) {
 
 	return (
 		<Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
-			<DialogTitle sx={{ px: 4, pt: 4, pb: 0 }}>
+			<DialogTitle sx={{ px: 4, pt: 4, pb: 0 }} component="div">
 				<Typography variant="h6" fontWeight={700}>
 					{team ? "Edit Team" : "Add New Team"}
 				</Typography>
