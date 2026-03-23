@@ -29,10 +29,6 @@ function CredentialsForm({ open, onClose, onConfirm, team }) {
 
 	const isFormValid = Object.values(formData).every((v) => v.trim() !== "");
 
-	const handleChange = (e) => {
-		setFormData({ ...formData, [e.target.name]: e.target.value });
-	};
-
 	useEffect(() => {
 		if (team) {
 			setFormData({ name: team.name, platform: team.platform, url: team.url, token: "" });
@@ -41,12 +37,17 @@ function CredentialsForm({ open, onClose, onConfirm, team }) {
 		}
 	}, [team]);
 
+	const handleChange = (e) => {
+		setFormData({ ...formData, [e.target.name]: e.target.value });
+	};
+
 	return (
 		<Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
 			<DialogTitle sx={{ px: 4, pt: 4, pb: 0 }}>
 				<Typography variant="h6" fontWeight={700}>
 					{team ? "Edit Team" : "Add New Team"}
 				</Typography>
+
 				<Typography variant="subtitle2" color="text.secondary" fontWeight={400} mt={0.5}>
 					{team ? "Update team credentials and information." : "Enter the team credentials to connect to their Kanban board."}
 				</Typography>
@@ -58,15 +59,17 @@ function CredentialsForm({ open, onClose, onConfirm, team }) {
 						<Typography variant="body2" fontWeight={500} mb={0.5}>
 							Team Name
 						</Typography>
-						<TextField name="name" value={formData.name} onChange={handleChange} placeholder="Enter team name" size="small" fullWidth />
+
+						<TextField name="name" value={formData.name} onChange={handleChange} placeholder="e.g., Team Alpha" size="small" fullWidth />
 					</Box>
 
 					<Box>
 						<Typography variant="body2" fontWeight={500} mb={0.5}>
 							Platform
 						</Typography>
+
 						<FormControl fullWidth size="small">
-							<Select name="platform" value={formData.platform} onChange={handleChange} displayEmpty>
+							<Select name="platform" value={formData.platform} onChange={handleChange}>
 								<MenuItem value="GitHub">GitHub</MenuItem>
 								<MenuItem value="Jira">Jira</MenuItem>
 							</Select>
@@ -75,15 +78,24 @@ function CredentialsForm({ open, onClose, onConfirm, team }) {
 
 					<Box>
 						<Typography variant="body2" fontWeight={500} mb={0.5}>
-							Project URL
+							Repository URL
 						</Typography>
-						<TextField name="url" value={formData.url} onChange={handleChange} placeholder="Enter project URL" size="small" fullWidth />
+
+						<TextField
+							name="url"
+							value={formData.url}
+							onChange={handleChange}
+							placeholder="github.com/team-name/repository"
+							size="small"
+							fullWidth
+						/>
 					</Box>
 
 					<Box>
 						<Typography variant="body2" fontWeight={500} mb={0.5}>
 							API Token / Credentials
 						</Typography>
+
 						<TextField
 							name="token"
 							value={formData.token}
@@ -102,6 +114,7 @@ function CredentialsForm({ open, onClose, onConfirm, team }) {
 								),
 							}}
 						/>
+
 						<Typography variant="caption" color="text.secondary">
 							Your credentials are encrypted and stored securely.
 						</Typography>

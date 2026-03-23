@@ -25,19 +25,38 @@ import CreateOutlinedIcon from "@mui/icons-material/CreateOutlined";
 import DeleteOutlineOutlinedIcon from "@mui/icons-material/DeleteOutlineOutlined";
 import AddIcon from "@mui/icons-material/Add";
 import AccessTimeIcon from "@mui/icons-material/AccessTime";
+
 import CredentialsForm from "../components/CredentialsForm";
 import Badge from "../components/Badge";
 
-const tableColumns = ["Team Name", "Platform", "Repository/Project URL", "Last Updated", "Status", "Actions"];
+const TABLE_COLUMNS = ["Team Name", "Platform", "Repository/Project URL", "Last Updated", "Status", "Actions"];
+
+const MOCK_TEAMS = [
+	{ id: 1, name: "Team Alpha", platform: "GitHub", url: "github.com/team-alpha/project", updated: "about 1 month ago", status: "Active" },
+	{ id: 2, name: "Team Beta", platform: "Jira", url: "teambeta.atlassian.net", updated: "about 1 month ago", status: "Active" },
+	{ id: 3, name: "Team Gamma", platform: "GitHub", url: "github.com/team-gamma/kanban", updated: "about 1 month ago", status: "Active" },
+	{ id: 4, name: "Team Delta", platform: "Jira", url: "teamdelta.atlassian.net", updated: "about 1 month ago", status: "Inactive" },
+];
 
 function CredentialsPage() {
 	const [teams, setTeams] = useState([]);
-	const [selectedTeam, setSelectedTeam] = useState();
+	const [selectedTeam, setSelectedTeam] = useState(null);
 
 	const [search, setSearch] = useState("");
 
 	const [openForm, setOpenForm] = useState(false);
 	const [openDelete, setOpenDelete] = useState(false);
+
+	const filteredTeams = teams.filter((t) => t.name.toLowerCase().includes(search.toLowerCase()));
+
+	useEffect(() => {
+		/*
+            http.get("/api/credentials")
+                .then((res) => setTeams(res.data))
+                .catch((err) => toast.error(err));
+        */
+		setTeams(MOCK_TEAMS);
+	}, []);
 
 	const handleNew = () => {
 		setSelectedTeam(null);
@@ -47,39 +66,6 @@ function CredentialsPage() {
 	const handleEdit = (team) => {
 		setSelectedTeam(team);
 		setOpenForm(true);
-	};
-
-	const onConfirm = (formData, id) => {
-		if (id) {
-			/*
-                http.put(`/api/credentials/${id}`)
-                    .then((res) => {
-                        console.log(res.data);
-                        toast.success("Team updated!")
-                    })
-                    .catch((err) => {
-                        console.error(err);
-                        toast.error(err);
-                    });
-            */
-			setTeams(teams.map((t) => (t.id === id ? { ...t, ...formData } : t)));
-		} //
-		else {
-			/*
-                http.post(`/api/credentials`)
-                    .then((res) => {
-                        console.log(res.data);
-                        toast.success("Team added!")
-                    })
-                    .catch((err) => {
-                        console.error(err);
-                        toast.error(err);
-                    });
-            */
-			setTeams([...teams, { id: Date.now(), ...formData, updated: "just now", status: "Active" }]);
-		}
-
-		setOpenForm(false);
 	};
 
 	const handleDeleteClick = (team) => {
@@ -95,37 +81,32 @@ function CredentialsPage() {
 	const handleDeleteConfirm = () => {
 		/*
             http.delete(`/api/credentials/${selectedTeam.id}`)
-                .then((res) => 
-                    toast.success("Team deleted!")
-                )
-                .catch((err) => 
-                    toast.error(err)
-                );
-    */
-		setTeams(teams.filter((t) => t.id !== selectedTeam.id));
+                .then(() => toast.success("Team deleted!"))
+                .catch((err) => toast.error(err));
+        */
+		setTeams((prev) => prev.filter((t) => t.id !== selectedTeam.id));
 		setOpenDelete(false);
 		setSelectedTeam(null);
 	};
 
-	useEffect(() => {
-		/*
-            http.get("/api/credentials")
-                .then((res) => {
-                    console.log(res.data);
-                    setTeams(res.data);
-                })
-                .catch((err) => {
-                    console.error(err);
-                    toast.error(err);
-                });
-        */
-		setTeams([
-			{ id: 1, name: "Team Alpha", platform: "GitHub", url: "github.com/team-alpha/project", updated: "about 1 month ago", status: "Active" },
-			{ id: 2, name: "Team Beta", platform: "Jira", url: "teambeta.atlassian.net", updated: "about 1 month ago", status: "Active" },
-			{ id: 3, name: "Team Gamma", platform: "GitHub", url: "github.com/team-gamma/kanban", updated: "about 1 month ago", status: "Active" },
-			{ id: 4, name: "Team Delta", platform: "Jira", url: "teamdelta.atlassian.net", updated: "about 1 month ago", status: "Inactive" },
-		]);
-	}, []);
+	const onConfirm = (formData, id) => {
+		if (id) {
+			/*
+                http.put(`/api/credentials/${id}`, formData)
+                    .then(() => toast.success("Team updated!"))
+                    .catch((err) => toast.error(err));
+            */
+			setTeams((prev) => prev.map((t) => (t.id === id ? { ...t, ...formData } : t)));
+		} else {
+			/*
+                http.post("/api/credentials", formData)
+                    .then(() => toast.success("Team added!"))
+                    .catch((err) => toast.error(err));
+            */
+			setTeams((prev) => [...prev, { id: Date.now(), ...formData, updated: "just now", status: "Active" }]);
+		}
+		setOpenForm(false);
+	};
 
 	return (
 		<>
@@ -137,16 +118,19 @@ function CredentialsPage() {
 						Are you sure?
 					</Typography>
 				</DialogTitle>
+
 				<DialogContent sx={{ px: 4, pt: 2, pb: 0 }}>
 					<Typography variant="body2" color="text.secondary">
 						This will permanently delete this team and remove all associated credentials. This action cannot be undone.
 					</Typography>
 				</DialogContent>
+
 				<DialogActions sx={{ px: 4, pt: 3, pb: 4 }}>
-					<Button onClick={handleDeleteClose} variant="ghost">
+					<Button onClick={handleDeleteClose} variant="ghost" sx={{ minWidth: 100 }}>
 						Cancel
 					</Button>
-					<Button onClick={handleDeleteConfirm} variant="contained" color="error">
+
+					<Button onClick={handleDeleteConfirm} variant="contained" color="error" sx={{ minWidth: 100 }}>
 						Delete Team
 					</Button>
 				</DialogActions>
@@ -184,61 +168,60 @@ function CredentialsPage() {
 					}}
 				/>
 
-				<TableContainer component={Paper} elevation={0} sx={{ border: "1px solid", borderColor: "grey.300", borderRadius: "8px" }}>
+				<TableContainer component={Paper} elevation={0} sx={{ border: "1px solid", borderColor: "grey.300", borderRadius: 2 }}>
 					<Table>
 						<TableHead>
 							<TableRow sx={{ backgroundColor: "background.default" }}>
-								{tableColumns.map((col) => (
-									<TableCell
-										key={col}
-										sx={{
-											fontSize: "11px",
-											fontWeight: 700,
-											color: "text.secondary",
-											letterSpacing: "0.05em",
-											textTransform: "uppercase",
-										}}
-									>
+								{TABLE_COLUMNS.map((col) => (
+									<TableCell key={col} sx={{ color: "text.secondary" }}>
 										{col}
 									</TableCell>
 								))}
 							</TableRow>
 						</TableHead>
-
 						<TableBody>
-							{teams.map((team) => (
-								<TableRow key={team.id} hover>
-									<TableCell sx={{ fontWeight: 500 }}>{team.name}</TableCell>
-
-									<TableCell>
-										<Badge label={team.platform} />
-									</TableCell>
-
-									<TableCell sx={{ color: "text.secondary", fontSize: "14px" }}>{team.url}</TableCell>
-
-									<TableCell>
-										<Box sx={{ display: "flex", alignItems: "center", gap: 0.5, color: "text.secondary" }}>
-											<AccessTimeIcon sx={{ fontSize: 14 }} />
-											{team.updated}
-										</Box>
-									</TableCell>
-
-									<TableCell>
-										<Badge label={team.status} />
-									</TableCell>
-
-									<TableCell>
-										<Box sx={{ display: "flex", gap: 0.3 }}>
-											<IconButton size="small" onClick={() => handleEdit(team)}>
-												<CreateOutlinedIcon fontSize="small" />
-											</IconButton>
-											<IconButton size="small" color="error" onClick={() => handleDeleteClick(team)}>
-												<DeleteOutlineOutlinedIcon fontSize="small" />
-											</IconButton>
-										</Box>
+							{filteredTeams.length === 0 ? (
+								<TableRow>
+									<TableCell colSpan={6} sx={{ textAlign: "center", py: 4, color: "text.secondary" }}>
+										No teams found.
 									</TableCell>
 								</TableRow>
-							))}
+							) : (
+								filteredTeams.map((team) => (
+									<TableRow key={team.id} hover>
+										<TableCell sx={{ fontWeight: 500 }}>{team.name}</TableCell>
+
+										<TableCell>
+											<Badge label={team.platform} />
+										</TableCell>
+
+										<TableCell sx={{ color: "text.secondary" }}>{team.url}</TableCell>
+
+										<TableCell>
+											<Box sx={{ display: "flex", alignItems: "center", gap: 0.5, color: "text.secondary" }}>
+												<AccessTimeIcon sx={{ fontSize: 14 }} />
+												{team.updated}
+											</Box>
+										</TableCell>
+
+										<TableCell>
+											<Badge label={team.status} />
+										</TableCell>
+
+										<TableCell>
+											<Box sx={{ display: "flex", gap: 0.3 }}>
+												<IconButton size="small" onClick={() => handleEdit(team)}>
+													<CreateOutlinedIcon fontSize="small" sx={{ color: "#2563eb" }} />
+												</IconButton>
+
+												<IconButton size="small" color="error" onClick={() => handleDeleteClick(team)}>
+													<DeleteOutlineOutlinedIcon fontSize="small" />
+												</IconButton>
+											</Box>
+										</TableCell>
+									</TableRow>
+								))
+							)}
 						</TableBody>
 					</Table>
 				</TableContainer>
