@@ -1,0 +1,289 @@
+import { useEffect, useState } from "react";
+import { toast } from "react-toastify";
+import {
+	Box,
+	Button,
+	Typography,
+	TextField,
+	Table,
+	TableBody,
+	TableCell,
+	TableContainer,
+	TableHead,
+	TableRow,
+	Paper,
+	Chip,
+	IconButton,
+	InputAdornment,
+	Dialog,
+	DialogTitle,
+	DialogContent,
+	DialogActions,
+} from "@mui/material";
+
+import SearchIcon from "@mui/icons-material/Search";
+import CreateOutlinedIcon from "@mui/icons-material/CreateOutlined";
+import DeleteOutlineOutlinedIcon from "@mui/icons-material/DeleteOutlineOutlined";
+import AddIcon from "@mui/icons-material/Add";
+import AccessTimeIcon from "@mui/icons-material/AccessTime";
+
+import theme from "../theme";
+import CredentialsForm from "../components/CredentialsForm";
+
+const tableColumns = ["Team Name", "Platform", "Repository/Project URL", "Last Updated", "Status", "Actions"];
+
+function Badge({ label }) {
+	let backgroundColor = "#ffffff";
+	let icon = null;
+
+	switch (label) {
+		case "GitHub":
+			backgroundColor = "#233449";
+			icon = <img src="https://cdn.simpleicons.org/github/white" width={12} height={12} />;
+			break;
+		case "Jira":
+			backgroundColor = "#0052CC";
+			icon = <img src="https://cdn.simpleicons.org/jira/white" width={12} height={12} />;
+			break;
+		case "Active":
+			backgroundColor = "#16a34a";
+			break;
+		case "Inactive":
+			backgroundColor = "#9ca3af";
+			break;
+	}
+
+	return (
+		<Chip
+			label={label}
+			size="small"
+			icon={icon}
+			sx={{
+				backgroundColor: backgroundColor,
+				color: "#ffffff",
+				fontWeight: 500,
+				fontSize: "12px",
+				borderRadius: "6px",
+			}}
+		/>
+	);
+}
+
+function CredentialsPage() {
+	const [teams, setTeams] = useState([]);
+	const [selectedTeam, setSelectedTeam] = useState();
+
+	const [search, setSearch] = useState("");
+
+	const [openForm, setOpenForm] = useState(false);
+	const [openDelete, setOpenDelete] = useState(false);
+
+	const handleNew = () => {
+		setSelectedTeam(null);
+		setOpenForm(true);
+	};
+
+	const handleEdit = (team) => {
+		setSelectedTeam(team);
+		setOpenForm(true);
+	};
+
+	const onConfirm = (formData, id) => {
+		if (id) {
+			/*
+                http.put(`/api/credentials/${id}`)
+                    .then((res) => {
+                        console.log(res.data);
+                        toast.success("Team updated!")
+                    })
+                    .catch((err) => {
+                        console.error(err);
+                        toast.error(err);
+                    });
+            */
+			setTeams(teams.map((t) => (t.id === id ? { ...t, ...formData } : t)));
+		} //
+		else {
+			/*
+                http.post(`/api/credentials`)
+                    .then((res) => {
+                        console.log(res.data);
+                        toast.success("Team added!")
+                    })
+                    .catch((err) => {
+                        console.error(err);
+                        toast.error(err);
+                    });
+            */
+			setTeams([...teams, { id: Date.now(), ...formData, updated: "just now", status: "Active" }]);
+		}
+
+		setOpenForm(false);
+	};
+
+	const handleDeleteClick = (team) => {
+		setSelectedTeam(team);
+		setOpenDelete(true);
+	};
+
+	const handleDeleteClose = () => {
+		setOpenDelete(false);
+		setSelectedTeam(null);
+	};
+
+	const handleDeleteConfirm = () => {
+		/*
+            http.delete(`/api/credentials/${selectedTeam.id}`)
+                .then((res) => 
+                    toast.success("Team deleted!")
+                )
+                .catch((err) => 
+                    toast.error(err)
+                );
+    */
+		setTeams(teams.filter((t) => t.id !== selectedTeam.id));
+		setOpenDelete(false);
+		setSelectedTeam(null);
+	};
+
+	useEffect(() => {
+		/*
+            http.get("/api/credentials")
+                .then((res) => {
+                    console.log(res.data);
+                    setTeams(res.data);
+                })
+                .catch((err) => {
+                    console.error(err);
+                    toast.error(err);
+                });
+        */
+		setTeams([
+			{ id: 1, name: "Team Alpha", platform: "GitHub", url: "github.com/team-alpha/project", updated: "about 1 month ago", status: "Active" },
+			{ id: 2, name: "Team Beta", platform: "Jira", url: "teambeta.atlassian.net", updated: "about 1 month ago", status: "Active" },
+			{ id: 3, name: "Team Gamma", platform: "GitHub", url: "github.com/team-gamma/kanban", updated: "about 1 month ago", status: "Active" },
+			{ id: 4, name: "Team Delta", platform: "Jira", url: "teamdelta.atlassian.net", updated: "about 1 month ago", status: "Inactive" },
+		]);
+	}, []);
+
+	return (
+		<>
+			<CredentialsForm open={openForm} onClose={() => setOpenForm(false)} onConfirm={onConfirm} team={selectedTeam} />
+
+			<Dialog open={openDelete} onClose={handleDeleteClose}>
+				<DialogTitle sx={{ px: 4, pt: 4, pb: 0 }}>
+					<Typography variant="h6" fontWeight={700}>
+						Are you sure?
+					</Typography>
+				</DialogTitle>
+				<DialogContent sx={{ px: 4, pt: 2, pb: 0 }}>
+					<Typography variant="body2" color="text.secondary">
+						This will permanently delete this team and remove all associated credentials. This action cannot be undone.
+					</Typography>
+				</DialogContent>
+				<DialogActions sx={{ px: 4, pt: 3, pb: 4 }}>
+					<Button onClick={handleDeleteClose} variant="ghost">
+						Cancel
+					</Button>
+					<Button onClick={handleDeleteConfirm} variant="contained" color="error">
+						Delete Team
+					</Button>
+				</DialogActions>
+			</Dialog>
+
+			<Box>
+				<Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", mb: 4 }}>
+					<Box>
+						<Typography variant="h5" fontWeight={700}>
+							Team Credentials Management
+						</Typography>
+
+						<Typography variant="body2" color="text.secondary" mt={0.5}>
+							Manage GitHub and Jira credentials for all teams
+						</Typography>
+					</Box>
+
+					<Button variant="contained" startIcon={<AddIcon />} onClick={handleNew}>
+						Add New Team
+					</Button>
+				</Box>
+
+				<TextField
+					placeholder="Search teams..."
+					size="small"
+					value={search}
+					onChange={(e) => setSearch(e.target.value)}
+					sx={{ mb: 3 }}
+					InputProps={{
+						startAdornment: (
+							<InputAdornment position="start">
+								<SearchIcon fontSize="small" sx={{ color: "text.secondary" }} />
+							</InputAdornment>
+						),
+					}}
+				/>
+
+				<TableContainer component={Paper} elevation={0} sx={{ border: "1px solid", borderColor: "grey.300", borderRadius: "8px" }}>
+					<Table>
+						<TableHead>
+							<TableRow sx={{ backgroundColor: "background.default" }}>
+								{tableColumns.map((col) => (
+									<TableCell
+										key={col}
+										sx={{
+											fontSize: "11px",
+											fontWeight: 700,
+											color: "text.secondary",
+											letterSpacing: "0.05em",
+											textTransform: "uppercase",
+										}}
+									>
+										{col}
+									</TableCell>
+								))}
+							</TableRow>
+						</TableHead>
+
+						<TableBody>
+							{teams.map((team) => (
+								<TableRow key={team.id} hover>
+									<TableCell sx={{ fontWeight: 500 }}>{team.name}</TableCell>
+
+									<TableCell>
+										<Badge label={team.platform} />
+									</TableCell>
+
+									<TableCell sx={{ color: "text.secondary", fontSize: "14px" }}>{team.url}</TableCell>
+
+									<TableCell>
+										<Box sx={{ display: "flex", alignItems: "center", gap: 0.5, color: "text.secondary" }}>
+											<AccessTimeIcon sx={{ fontSize: 14 }} />
+											{team.updated}
+										</Box>
+									</TableCell>
+
+									<TableCell>
+										<Badge label={team.status} />
+									</TableCell>
+
+									<TableCell>
+										<Box sx={{ display: "flex", gap: 0.3 }}>
+											<IconButton size="small" onClick={() => handleEdit(team)}>
+												<CreateOutlinedIcon fontSize="small" />
+											</IconButton>
+											<IconButton size="small" color="error" onClick={() => handleDeleteClick(team)}>
+												<DeleteOutlineOutlinedIcon fontSize="small" />
+											</IconButton>
+										</Box>
+									</TableCell>
+								</TableRow>
+							))}
+						</TableBody>
+					</Table>
+				</TableContainer>
+			</Box>
+		</>
+	);
+}
+
+export default CredentialsPage;
