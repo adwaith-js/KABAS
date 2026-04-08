@@ -4,9 +4,13 @@ import { Toaster } from '../components/ui/sonner';
 
 export function RootLayout() {
   return (
-    <div className="min-h-screen bg-gray-50">
-      <Navbar />
-      <Outlet />
+    <div className="app-bg">
+      <div className="relative z-10 min-h-screen flex flex-col">
+        <Navbar />
+        <main className="flex-1">
+          <Outlet />
+        </main>
+      </div>
       <Toaster />
     </div>
   );

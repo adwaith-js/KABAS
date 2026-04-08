@@ -5,6 +5,7 @@ import { TeamCredentials } from './pages/TeamCredentials';
 import { TeamDashboard } from './pages/TeamDashboard';
 import { NotFound } from './pages/NotFound';
 import { RootLayout } from './layouts/RootLayout';
+import { ProtectedRoute } from './components/ProtectedRoute';
 
 export const router = createBrowserRouter([
   {
@@ -17,15 +18,15 @@ export const router = createBrowserRouter([
       },
       {
         path: 'dashboard',
-        element: <Dashboard />,
+        element: <ProtectedRoute><Dashboard /></ProtectedRoute>,
       },
       {
         path: 'credentials',
-        element: <TeamCredentials />,
+        element: <ProtectedRoute><TeamCredentials /></ProtectedRoute>,
       },
       {
         path: 'team/:teamId',
-        element: <TeamDashboard />,
+        element: <ProtectedRoute><TeamDashboard /></ProtectedRoute>,
       },
       {
         path: '*',
