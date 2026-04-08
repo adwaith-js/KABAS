@@ -21,8 +21,8 @@ server/       ← Express API server
 ### 1. Clone & install
 
 ```bash
-git clone https://github.com/adwaith-js/KABAS-test.git
-cd KABAS-test
+git clone https://github.com/adwaith-js/KABAS.git
+cd KABAS
 npm install
 cd server && npm install && cd ..
 ```
