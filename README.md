@@ -15,6 +15,7 @@ A standalone web application that allows instructors to assess student teams' Ka
 src/          ← React frontend
 server/       ← Express API server
 ```
+Hosted online on https://kabas-test.vercel.app/  Credentials email: admin@kabas.edu | kabas2025
 
 ## Quick Start
 
